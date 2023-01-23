@@ -1,10 +1,11 @@
 const socket = io("/");
-const videoGrid = document.getElementById("video-grid");
+const videoGrid = document.getElementById("video-grid"); 
 const myVideo = document.createElement("video");
 const showChat = document.querySelector("#showChat");
 const backBtn = document.querySelector(".header__back");
 myVideo.muted = true;
 
+// เมื่อมีการคลิกจะดึงข้อมูลจาก style.css มาแสดง
 backBtn.addEventListener("click", () => {
   document.querySelector(".main__left").style.display = "flex";
   document.querySelector(".main__left").style.flex = "1";
@@ -12,6 +13,7 @@ backBtn.addEventListener("click", () => {
   document.querySelector(".header__back").style.display = "none";
 });
 
+// เมื่อมีการคลิกจะดึงข้อมูลจาก style.css มาแสดง
 showChat.addEventListener("click", () => {
   document.querySelector(".main__right").style.display = "flex";
   document.querySelector(".main__right").style.flex = "1";
@@ -19,8 +21,10 @@ showChat.addEventListener("click", () => {
   document.querySelector(".header__back").style.display = "block";
 });
 
+// รอป้อนชื่อ
 const user = prompt("Enter your name");
 
+// สร้างตัวแปล host,port,path,config
 var peer = new Peer({
   host: '127.0.0.1',
   port: 3030,
@@ -49,9 +53,11 @@ var peer = new Peer({
     ]
   },
 
+  // แสดงข้อมูล error ทั้งหมด
   debug: 3
 });
 
+// รับตัวแปล stream ถ้าผู้ใช้อนุญาตจะสามารถเปิดกล้องและแชทได้ 
 let myVideoStream;
 navigator.mediaDevices
   .getUserMedia({
@@ -76,7 +82,8 @@ navigator.mediaDevices
     });
   });
 
-const connectToNewUser = (userId, stream) => {
+  // เชื่อมต่อผู้ใช้จากไอดี จากนั้นแสดงวิดิโอและแชทได้ 
+  const connectToNewUser = (userId, stream) => {
   console.log('I call someone' + userId);
   const call = peer.call(userId, stream);
   const video = document.createElement("video");
@@ -85,11 +92,13 @@ const connectToNewUser = (userId, stream) => {
   });
 };
 
+// แสดงไอดีของตัวเองในห้องที่เข้า
 peer.on("open", (id) => {
   console.log('my id is' + id);
   socket.emit("join-room", ROOM_ID, id, user);
 });
 
+// แสดงวิดีโอ
 const addVideoStream = (video, stream) => {
   video.srcObject = stream;
   video.addEventListener("loadedmetadata", () => {
@@ -98,10 +107,12 @@ const addVideoStream = (video, stream) => {
   });
 };
 
+// สร้างตัวแปลเพื่อเรียกใช้งาน
 let text = document.querySelector("#chat_message");
 let send = document.getElementById("send");
 let messages = document.querySelector(".messages");
 
+// เมื่อคลิกจะส่ง message ตามที่พิมไปยัง #chat_message
 send.addEventListener("click", (e) => {
   if (text.value.length !== 0) {
     socket.emit("message", text.value);
@@ -109,6 +120,7 @@ send.addEventListener("click", (e) => {
   }
 });
 
+// เมื่อกดปุ่ม enter จะส่ง message ตามที่พิมไปยัง #chat_message
 text.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && text.value.length !== 0) {
     socket.emit("message", text.value);
@@ -116,9 +128,12 @@ text.addEventListener("keydown", (e) => {
   }
 });
 
+// ปุ่มเชิญชวน ปุ่มปิดเสียง และปุ่มปิดกล้อง
 const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
+
+// โค้ดเปิด/ปิดเสียง
 muteButton.addEventListener("click", () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
   if (enabled) {
@@ -134,6 +149,7 @@ muteButton.addEventListener("click", () => {
   }
 });
 
+// โค้ดเปิด/ปิดกล้อง
 stopVideo.addEventListener("click", () => {
   const enabled = myVideoStream.getVideoTracks()[0].enabled;
   if (enabled) {
@@ -149,6 +165,7 @@ stopVideo.addEventListener("click", () => {
   }
 });
 
+// โค้ดก็อปปี้เพื่อเชิญชวน
 inviteButton.addEventListener("click", (e) => {
   prompt(
     "Copy this link and send it to people you want to meet with",
@@ -156,6 +173,7 @@ inviteButton.addEventListener("click", (e) => {
   );
 });
 
+// ตั้งค่าชื่อผู้ใช้เมื่อเข้าเว็บ
 socket.on("createMessage", (message, userName) => {
   messages.innerHTML =
     messages.innerHTML +
